@@ -1,0 +1,44 @@
+{
+    "name": "ipuppy",
+    "manifest_version":2,
+    "version": "0.0.1",
+    "description": "管理您的密码",
+    "browser_action": {
+        "default_icon": "dog_50x50.png" ,
+        "default_title": "ipuppy",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "js": ["js/zepto.js", "js/login.js"],
+            "css": ["css/login.css"],
+            "matches": [
+                "https://*/*"
+            ],
+            "all_frames": true,
+            "run_at": "document_end"
+        }
+       /* {
+            "js": ["js/login/tapd.js"],
+            "matches": [
+                "https://www.tapd.cn/cloud_logins/*"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "js": ["js/login/graphqq.js"],
+            "matches": [
+               // "https://graph.qq.com/oauth2.0/show*",
+                "https://xui.ptlogin2.qq.com/cgi-bin/xlogin*"
+            ],
+            "all_frames": true,
+            "run_at": "document_end"
+        }*/
+    ],
+    "background": {
+        "scripts":["js/zepto.js", "backend.js"]
+    },
+    "permissions": [
+        "tabs", "http://*/", "https://*/*"
+    ]
+}
