@@ -8,7 +8,12 @@ config.setLogin.processArr = ['login', 'next', 'passwd', 'captcha', 'sumbit', 'c
 config.setLogin.tips ={'login':'确定选择当前为 [帐号输入框] 么？', 'next':'确定选择当前为 [下一步按鈕] 么, 取消跳过？', 'passwd':'确定选择当前为 [密碼输入框] 么？', 'captcha':'需要輸入驗證碼麼，取消跳过？', 'sumbit':'确定选择当前为 [提交] 么？', 'confirm':'完成请点确定，取消请刷新当前页重头开始! '};
 config.setLogin.process = {'login':null, 'next':null, 'passwd':null, 'captcha':null, 'sumbit':null};
 config.userLogin = {}
-
+function sleep(delay) {
+    var start = (new Date()).getTime();
+    while ((new Date()).getTime() - start < delay) {
+        continue;
+    }
+}
 function init() {
     $.ajax({
         type: 'GET',
@@ -31,38 +36,35 @@ function userLogin() {
 
     this.exec = function (data, account) {
         console.log('account:', account);
-       // let loginData = JSON.parse(data);
+
+         let evt = document.createEvent('KeyboardEvent');
+         evt.initEvent('focus', true, true);
 
         for (x in data)
         {
-            if(x == 'login'){
-              let ele =   data[x].T == 'I'? $('#'+data[x].V) : (data[x].T == 'N' ? $(data[x].V) : $(data[x].V));
-                ele.val(account.a);
-                ev = document.createEvent("HTMLEvents");
-                ev.initEvent("change", false, true);
-                ele.dispatchEvent(ev);
-            }
-            if(x == 'next' && (data[x].V != '' || data[x].V != undefined) ){
-                let ele =   data[x].T == 'I'? $('#'+data[x].V) : (data[x].T == 'N' ? $(data[x].V) : $(data[x].V));
-                ele.click();
-            }
-            if(x == 'passwd' && (data[x].V != '' || data[x].V != undefined) ){
-                let ele =   data[x].T == 'I'? $('#'+data[x].V) : (data[x].T == 'N' ? $(data[x].V) : $(data[x].V));
-                ele.val(account.p);
-            }
-            if(x == 'captcha' && (data[x].V != '' || data[x].V != undefined) ){
-                let ele =   data[x].T == 'I'? $('#'+data[x].V) : (data[x].T == 'N' ? $(data[x].V) : $(data[x].V));
-                ele.val(account.p);
+            let ele =   data[x].T == 'I'? document.querySelector('#'+data[x].V) : (data[x].T == 'N' ? document.querySelector(data[x].V) : document.querySelector(data[x].V));
+            if(ele == '' || ele == undefined || ele.length == 0){
+                continue;
             }
 
-            if(x == 'sumbit' && (data[x].V != '' || data[x].V != undefined) ){
-                let ele =   data[x].T == 'I'? $('#'+data[x].V) : (data[x].T == 'N' ? $(data[x].V) : $(data[x].V));
-                ele.click();
+            switch (x){
+                case 'login':
+                    ele.value = account.a;
+                    ele.dispatchEvent(evt);
+                    break;
+                case  'passwd':
+                    ele.value = account.p;
+                    ele.dispatchEvent(evt);
+                    break;
+                case 'next':
+                    ele.click();
+                    break;
+                case 'submit':
+                    ele.click();
+                    break;
             }
-            //document.write(mycars[x] + "<br />")
+
         }
-
-
 
     }
 
@@ -70,110 +72,16 @@ function userLogin() {
 
 
         let data = config.userLogin.loginData;
+        console.log('checklogin data', data);
+        if(data == '' || data == undefined || data.length == 0){
+            return null;
+        }
 
         let ele =   data['login'].T == 'I'? $('#'+data['login'].V) : (data['login'].T == 'N' ? $(data['login'].V) : $(data['login'].V));
 
         return ele;
-        // ele.val(account.a);
-
-
-
-        let loginNames = ['email', 'u','username', 'user_principal_name', 'loginfmt', 'data[Login][email]', 'LoginForm[username]'], u = null;
-
-        for(j = 0,len=loginNames.length; j < len; j++) {
-            u = document.getElementsByName(loginNames[j]);
-            if(u != null && u.length > 0 ){
-                console.log('loginname', loginNames[j]);
-                return u[0];
-            }else{
-                u = null;
-            }
-        }
-        return u;
     }
 
-    this.checkPasswd = function() {
-        let loginNames = ['password', 'p','passwd', 'user_principal_name', 'data[Login][password]', 'LoginForm[password]'], p = null;
-
-        for(j = 0,len=loginNames.length; j < len; j++) {
-            p = document.getElementsByName(loginNames[j]);
-            if(p != null && p.length > 0 ){
-                clearInterval(intervalCheckPasswd);
-                return p[0];
-            }else {
-                p = null;
-            }
-        }
-        return p;
-    }
-
-    this.checkNext = function() {
-        let loginIds = ['idSIButton9', 'J_FormNext'], n = null;
-
-        for(j = 0,len=loginIds.length; j < len; j++) {
-            n = document.getElementById(loginIds[j]);
-            if(n != null){
-                return n;
-            }
-        }
-        return null;
-    }
-
-    this.submit = function () {
-        let logins = ['login-form'], s = null;
-        for(j = 0,len=logins.length; j < len; j++) { //form;
-            s = document.getElementsByClassName(logins[j]);
-            if(s != null && s.length > 0){
-                s[0].submit();
-            }else{
-                s = null;
-            }
-        }
-
-        let loginIds = ['login_button', 'tcloud_login_button', 'idSIButton9'];
-
-        for(j = 0,len=loginIds.length; j < len; j++) {
-            s = document.getElementById(loginIds[j]);
-            if(s != null){
-                s.click();
-                break;
-            } else {
-                s = null;
-            }
-        }
-
-    }
-
-    /*
-
-    function startListener() {
-        chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-            if (request.code == 0) {
-                sendResponse({ok: 1});
-                let u = document.getElementById('u');
-                let p = document.getElementById('p');
-                let s = document.getElementById('login_button');
-                u.value = request.data.a;
-                p.value = request.data.p;
-                s.click();
-            }
-
-        });
-    }
-    */
-
-    this.runNext = function(passwd){
-        let p = checkPasswd();
-        p.value = passwd;
-        //触发一下事件
-        ev = document.createEvent("HTMLEvents");
-        ev.initEvent("change", false, true);
-        p.dispatchEvent(ev);
-        submit();
-    }
-
-    return this;
-    alert(222);
 
 }
 
@@ -190,19 +98,7 @@ function getCurrentUrl(){
 }
 
 function setLogin() {
-
-    // this.getCurrentUrl = function() {
-    //
-    //     let l = document.createElement("a");
-    //     l.href = window.location.href;
-    //     let parseUrlArr = l;
-    //     config.setLogin.cUrl = parseUrlArr.hostname; //parseUrlArr.pathname != undefined ? parseUrlArr.hostname+parseUrlArr.pathname : parseUrlArr.hostname;
-    //     if(config.setLogin.cUrl.indexOf('qq.com') != -1){
-    //         config.setLogin.cUrl = 'qq.com';
-    //     }
-    //     return config.setLogin.cUrl;
-    // }
-
+    
     this.setOnClick = function () {
 
         getCurrentUrl();
