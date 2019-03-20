@@ -1,12 +1,13 @@
 //alert('qq');
 console.log('login');
 let config = {};
+config.server = 'https://miniapp.ipuppy.vip';
 config.setLogin = {};
 config.setLogin.cUrl = '';
 config.setLogin.currStep = 0;
-config.setLogin.processArr = ['login', 'next', 'passwd', 'captcha', 'sumbit', 'confirm'];
-config.setLogin.tips ={'login':'确定选择当前为 [帐号输入框] 么？', 'next':'确定选择当前为 [下一步按鈕] 么, 取消跳过？', 'passwd':'确定选择当前为 [密碼输入框] 么？', 'captcha':'需要輸入驗證碼麼，取消跳过？', 'sumbit':'确定选择当前为 [提交] 么？', 'confirm':'完成请点确定，取消请刷新当前页重头开始! '};
-config.setLogin.process = {'login':null, 'next':null, 'passwd':null, 'captcha':null, 'sumbit':null};
+config.setLogin.processArr = ['login', 'next', 'passwd', 'captcha', 'submit', 'confirm'];
+config.setLogin.tips ={'login':'确定选择当前为【 帐号输入框 】么？', 'next':'确定选择当前为【 下一步按鈕 】么？, 按取消跳过！', 'passwd':'确定选择当前为 【 密碼输入框 】么？', 'captcha':'确定选择当前为 【 验证码输入框 】么？，按取消跳过！', 'submit':'确定选择当前为 【 提交按钮 】么？', 'confirm':'完成请点确定，取消请刷新当前页从头开始! '};
+config.setLogin.process = {'login':null, 'next':null, 'passwd':null, 'captcha':null, 'submit':null};
 config.userLogin = {}
 function sleep(delay) {
     var start = (new Date()).getTime();
@@ -17,7 +18,7 @@ function sleep(delay) {
 function init() {
     $.ajax({
         type: 'GET',
-        url: 'https://miniapp-test.ipuppy.vip/site-configs/'+getCurrentUrl(),//'http://homestead.puppy/site-configs',
+        url: config.server+'/site-configs/'+getCurrentUrl(),//'http://homestead.puppy/site-configs',
         dataType: 'json',
         timeout: 300,
         success: function(data){
@@ -30,37 +31,67 @@ function init() {
     })
 
 }
+function btnClick(type) {
+    let userlogin1 = new userLogin();
+    let ele1 = userlogin1.getElement(config.userLogin.loginData, type);
+    ele1.click();
 
+    if(ele1.disabled) {
+        setTimeout("btnClick('"+type+"')",1000);
+    }
+}
 function userLogin() {
     this.intervalCheckPasswd = 0;
+    this.intervalRunCnt = 0;
+
+    this.getElement = function(data, x){
+        return data[x].T == 'I'? document.querySelector('#'+data[x].V) : (data[x].T == 'N' ? document.querySelector("[name='" + data[x].V + "']") : document.querySelector(data[x].V));
+    }
+
 
     this.exec = function (data, account) {
         console.log('account:', account);
 
-         let evt = document.createEvent('KeyboardEvent');
-         evt.initEvent('focus', true, true);
+         let evtFocus = document.createEvent('HTMLEvents');
+         evtFocus.initEvent('focus', true, true);
+
+        let evtChange = document.createEvent('HTMLEvents');
+        evtChange.initEvent('change', true, true);
+
+        let evtOnChange = document.createEvent('HTMLEvents');
+        evtOnChange.initEvent('onchange', true, true);
+
+        let evtClick = document.createEvent('HTMLEvents');
+        evtClick.initEvent('click', true, true);
+
 
         for (x in data)
         {
-            let ele =   data[x].T == 'I'? document.querySelector('#'+data[x].V) : (data[x].T == 'N' ? document.querySelector(data[x].V) : document.querySelector(data[x].V));
-            if(ele == '' || ele == undefined || ele.length == 0){
+            let ele = this.getElement(data, x)
+
+         if(ele == '' || ele == undefined || ele.length == 0){
                 continue;
             }
 
             switch (x){
                 case 'login':
                     ele.value = account.a;
-                    ele.dispatchEvent(evt);
+                    ele.dispatchEvent(evtFocus);
+                    ele.dispatchEvent(evtChange);
+                    ele.dispatchEvent(evtOnChange);
                     break;
                 case  'passwd':
                     ele.value = account.p;
-                    ele.dispatchEvent(evt);
+                    ele.dispatchEvent(evtFocus);
+                    ele.dispatchEvent(evtChange);
+                    ele.dispatchEvent(evtOnChange);
                     break;
                 case 'next':
                     ele.click();
                     break;
                 case 'submit':
-                    ele.click();
+                   let that = this;
+                    setTimeout("btnClick('submit')",1000)
                     break;
             }
 
@@ -69,7 +100,6 @@ function userLogin() {
     }
 
     this.checkLoign = function() {
-
 
         let data = config.userLogin.loginData;
         console.log('checklogin data', data);
@@ -91,25 +121,33 @@ function getCurrentUrl(){
     l.href = window.location.href;
     let parseUrlArr = l;
     config.setLogin.cUrl = parseUrlArr.hostname; //parseUrlArr.pathname != undefined ? parseUrlArr.hostname+parseUrlArr.pathname : parseUrlArr.hostname;
-    if(config.setLogin.cUrl.indexOf('qq.com') != -1){
-        config.setLogin.cUrl = 'qq.com';
-    }
+    // if(config.setLogin.cUrl.indexOf('qq.com') != -1){
+    //     config.setLogin.cUrl = 'qq.com';
+    // }
     return config.setLogin.cUrl;
 }
 
 function setLogin() {
-    
+
     this.setOnClick = function () {
+        $('form').attr('onsubmit','return false;');
+        $('form').attr('action','');
+
+
+        $('form').bind('submit', function (e) {
+            alert(1);
+            e.preventDefault();
+
+        });
 
         getCurrentUrl();
-         chrome.runtime.sendMessage({"ac": "getLoginCurrStep"}, function(response) {
+        chrome.runtime.sendMessage({"ac": "getLoginCurrStep"}, function(response) {
                console.log('setLoginCurrStep', response);
                config.setLogin.currStep = response.currStep;
             });//end  sendMessage
 
 
         document.onclick = function (e) {
-
 
             //let that = this;
             let currStep = config.setLogin.processArr[config.setLogin.currStep];
@@ -121,7 +159,7 @@ function setLogin() {
                 if(currStep == 'confirm') {//cancel 就是取消
                     $.ajax({
                         type: 'POST',
-                        url: 'https://miniapp-test.ipuppy.vip/site-configs',//'http://homestead.puppy/site-configs',
+                        url: config.server+'/site-configs',//'http://homestead.puppy/site-configs',
                         // data to be added to query string:
                         data: { data:  config.setLogin.process, url: config.setLogin.cUrl },
                         // type of data we are expecting in return:
@@ -134,9 +172,10 @@ function setLogin() {
                             // alert('Ajax error!')
                         }
                     })
-                    console.log('阴止事件');
+                    console.log('阴止事件2');
                     $(e.target).off(); //关闭一些事件
                     e.preventDefault(); //.preventDefault();
+                    location.reload();
                     return;
 
                 }
@@ -157,7 +196,8 @@ function setLogin() {
 
 
                 if( (config.setLogin.process[currStep].V == "" || config.setLogin.process[currStep].V == undefined) && (e.target.className != "" || e.target.className != undefined)){
-                    config.setLogin.process[currStep].V =  e.target.className;
+                    let className = e.target.className.replace(/\s/g, ".");
+                    config.setLogin.process[currStep].V =  "." + className.replace(".ipuppy_green_line", "");
                     config.setLogin.process[currStep].T =  'C';
                 }
                 console.log('config.setLogin.process[currStep].V', config.setLogin.process[currStep].V);
@@ -180,7 +220,8 @@ function setLogin() {
                     }
 
                     if( config.setLogin.process[currStep].V == "" && e.target.className != "" && e.target.className != undefined){
-                        config.setLogin.process[currStep].V =  e.target.className;
+                        let className = e.target.className.replace(/\s/g, ".");
+                        config.setLogin.process[currStep].V =  "." + className.replace(".ipuppy_green_line", "");
                         config.setLogin.process[currStep].T =  'C';
                     }
 
@@ -194,10 +235,8 @@ function setLogin() {
                         console.log('同步成功', response);
                     }
 
-
                 });//end  sendMessage
 
-                //document.write("You pressed OK!")
             }
             else
             {
@@ -213,22 +252,28 @@ function setLogin() {
 
                     });
                 }
+                if(currStep == 'confirm') {//cancel 就是取消
+                    console.log('阴止事件2');
+                    $(e.target).off(); //关闭一些事件
+                    e.preventDefault(); //.preventDefault();
+                    location.reload();
+                    return;
+                }
 
-                //document.write("You pressed Cancel!")
             }
+
             console.log('currStep != \'next\'', currStep != 'next');
 
             if(currStep != 'next'){//cancel 就是取消{
-                console.log('阴止事件');
+                console.log('阴止事件1');
                 $(e.target).off(); //关闭一些事件
                 e.preventDefault(); //.preventDefault();
+                return false;
             }
 
-
-            // e.target, e.srcElement and e.toElement contains the element clicked.
-           // alert("User clicked a " + e.target.name + " element.");
         };
     }
+
     this.setGreenLine = function () {
         let element = null;
 
@@ -255,11 +300,8 @@ function setLogin() {
 
     }
 }
-//var login = new login();
 
 function run () {
-   // let userLogin1 =  new userLogin();
-
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
         let userLogin1 =  new userLogin();
@@ -287,50 +329,14 @@ function run () {
 
 
 
-        if (request.code == 0) {
+        if (request.code == 0) {//
             sendResponse({ok: 1});
-           // userLogin1.loginData = request.data;
-
             userLogin1.exec(config.userLogin.loginData, request.data);
-            return;
 
-
-
-            //
-            u.value = request.data.a;
-
-            //触发一下事件
-            ev = document.createEvent("HTMLEvents");
-            ev.initEvent("change", false, true);
-            u.dispatchEvent(ev);
-
-            let n = userLogin1.checkNext();
-            if(n != null){
-                intervalCheckPasswd = setInterval(function()
-                {
-                    console.log('request.data.p', request.data.p);
-                    userLogin1.runNext( request.data.p);
-                },1000);
-                return n.click();
-            }
-            let p = userLogin1.checkPasswd();
-            p.value = request.data.p;
-            sendResponse({ok: 1});
-            userLogin1.submit();
         }
 
     });
 
-    /*
-    let u = userLogin1.checkLoign();
-    console.log('loginjs.u主', u);
-    if(u == null){
-        console.log('没有登录页主');
-       // return sendResponse({code:-1, msg: "没有登录信息"});
-        return chrome.extension.sendMessage(  {code:-1, msg: "没有登录信息"}, function(response) {  console.log(response); }  );
-    }
-    return chrome.extension.sendMessage(  {code:0, msg: "有登录"}, function(response) {  console.log(response); }  );
-*/
 }
 
 
@@ -339,5 +345,4 @@ init();
 run();
 
 
-//setLogin.setGreenLine();
 

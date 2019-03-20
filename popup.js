@@ -1,4 +1,4 @@
-var rUrl = 'https://miniapp-test.ipuppy.vip/qr-logins';
+var rUrl = 'https://miniapp.ipuppy.vip/qr-logins';
 var id = '';
 var intervalQueryLogin;
 var queryLoginCnt = 0;
@@ -17,7 +17,7 @@ function getQrPasswd() {
     if(! $("#conect").is(":checked")){
         mUrl = "";
     }
-    let passStr = JSON.stringify({"ac":"NEW", "account":$("#account").val(), "passwd":$("#passwd").val(), "url":mUrl});
+    let passStr = JSON.stringify({"ac":"NEW", "account":$("#account").val().replace(/(^\s*)|(\s*$)/g, ""), "passwd":$("#passwd").val().replace(/(^\s*)|(\s*$)/g, ""), "url":mUrl});
 
     $('#tab2').html('<div id="qrcode1" align="center"></div><span class="tip">Tips:请打开微信扫码并保存！</span>');
 
@@ -67,9 +67,9 @@ function getCurrentUrl() {
         let title = d[0].title;
         let parseUrlArr = parseUrl(url);
         cUrl = parseUrlArr.hostname; //parseUrlArr.pathname != undefined ? parseUrlArr.hostname+parseUrlArr.pathname : parseUrlArr.hostname;
-        if(cUrl.indexOf('qq.com') != -1){
-            cUrl = 'qq.com';
-        }
+        // if(cUrl.indexOf('qq.com') != -1){
+        //     cUrl = 'qq.com';
+        // }
         startListener();
     });
 
@@ -84,6 +84,9 @@ function queryLogin() {
             return false;
         }
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+            if(tabs[0].url == 'chrome://newtab/'){
+                return true;
+            }
             chrome.tabs.sendMessage(tabs[0].id, res, function(response) {
                 if(response !=undefined && response.ok == 1){
                     clearInterval(intervalQueryLogin);
@@ -130,6 +133,10 @@ function startListener() {
     }
 
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){ //主动查询
+
+        if(tabs[0].url == 'chrome://newtab/'){
+            return true;
+        }
         chrome.tabs.sendMessage(tabs[0].id, {code:1}, function(response) {
             console.log('response Lister', response);
             if(response == undefined || response.code < 0 ){
@@ -159,6 +166,9 @@ function startListener() {
 
 function startSetting() {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){ //设置通知
+        if(tabs[0].url == 'chrome://newtab/'){
+            return true;
+        }
         chrome.tabs.sendMessage(tabs[0].id, {code:2}, function(response) {
             console.log('response Lister', response);
             if(response == undefined || response.code < 0 ){
