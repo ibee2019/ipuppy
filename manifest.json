@@ -3,6 +3,9 @@
     "manifest_version":2,
     "version": "0.0.1",
     "description": "管理您的密码",
+   // "content_security_policy": "script-src 'self' 'sha256-YjdmYTQxY2Y5Y2FjMTRjOTg4ZjA3NGQ4MWM4YjNjYTJlMzBmNzIzMzY2ZGFjNzEwMGY1ZTZjMmQxZDk0OTNiMQ==';object-src 'self'",
+  //  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    //          sdf"content_security_policy": "default-src 'self'; script-src 'unsafe-eval' 'unsafe-inline'; style-src 'unsafe-inline'",
     "browser_action": {
         "default_icon": "dog_50x50.png" ,
         "default_title": "ipuppy",

@@ -58,40 +58,48 @@ function userLogin() {
         let evtChange = document.createEvent('HTMLEvents');
         evtChange.initEvent('change', true, true);
 
-        let evtOnChange = document.createEvent('HTMLEvents');
-        evtOnChange.initEvent('onchange', true, true);
+        //vue
+        let evtVueChange = document.createEvent('HTMLEvents');
+         evtVueChange.initEvent('input', true, true);
 
-        let evtClick = document.createEvent('HTMLEvents');
-        evtClick.initEvent('click', true, true);
+
+
 
 
         for (x in data)
         {
             let ele = this.getElement(data, x)
 
-         if(ele == '' || ele == undefined || ele.length == 0){
+            console.log('ele', ele);
+            if(account.a == '' || account.a == undefined){
+                alert('空');
+            }
+
+            if(ele == '' || ele == undefined || ele.length == 0){
                 continue;
             }
 
             switch (x){
                 case 'login':
+
                     ele.value = account.a;
                     ele.dispatchEvent(evtFocus);
                     ele.dispatchEvent(evtChange);
-                    ele.dispatchEvent(evtOnChange);
+                    ele.dispatchEvent(evtVueChange);
                     break;
                 case  'passwd':
                     ele.value = account.p;
                     ele.dispatchEvent(evtFocus);
                     ele.dispatchEvent(evtChange);
-                    ele.dispatchEvent(evtOnChange);
+                    ele.dispatchEvent(evtVueChange);
                     break;
                 case 'next':
                     ele.click();
                     break;
                 case 'submit':
                    let that = this;
-                    setTimeout("btnClick('submit')",1000)
+                    ele.click();
+                    setTimeout("btnClick('submit')",1000);
                     break;
             }
 
@@ -316,6 +324,7 @@ function run () {
                 return chrome.extension.sendMessage(  {code:-1, msg: "没有登录信息"}, function(response) {  console.log(response); }  );
             }
             console.log('loginjs.u被', '有登录');
+          //  location.reload();
             sendResponse({code:0, msg: "有登录"});
         }
 
