@@ -12,16 +12,20 @@ var parseUrl = function(href) {//getLocation
     return l;
 };
 
+
+
 function getQrPasswd() {
     let mUrl = cUrl;
     if(! $("#conect").is(":checked")){
         mUrl = "";
     }
     let passStr = JSON.stringify({"ac":"NEW", "account":$("#account").val().replace(/(^\s*)|(\s*$)/g, ""), "passwd":$("#passwd").val().replace(/(^\s*)|(\s*$)/g, ""), "url":mUrl});
-
+    console.log('passStr', passStr);
     $('#tab2').html('<div id="qrcode1" align="center"></div><span class="tip">Tips:请打开微信扫码并保存！</span>');
-
-    let qrcode = new  QRCode("qrcode1", {
+   // passStr.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '');
+    let qrcode = new  QRCode("qrcode1");
+    /*
+    {
         text: "a",
         width: 180,
         height: 180,
@@ -29,7 +33,11 @@ function getQrPasswd() {
         colorLight : "#ffffff",
         typeNumber:4,
         correctLevel : QRCode.CorrectLevel.H
-    });
+    }
+     */
+
+   // ('#qrcode1').innerHTML = create_qrcode(passStr, 0, 'M', 'Byte', 'UTF-8');
+
     qrcode.makeCode(passStr);
 }
 
@@ -45,8 +53,8 @@ function getQrlogin() {
         // alert(qrinfo);
         let qrcode = new  QRCode("qrcode", {
             text: "a",
-            width: 180,
-            height: 180,
+            width: 300,
+            height: 300,
             colorDark : "#000000",
             colorLight : "#ffffff",
             typeNumber:4,
